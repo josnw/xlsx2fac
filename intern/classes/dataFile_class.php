@@ -6,7 +6,7 @@ class dataFile {
 	private $inData = [];
 	private $header = [];
 	private $rowCount = 0;
-	private $rowPointer = 1;
+	private $rowPointer = 0;
 	private $rememberMe = [];
 	private $pg_pdo;
 	
@@ -69,7 +69,7 @@ class dataFile {
 	
 	
 	public function resetPointer() {
-		$this->rowPointer = 1;	
+		$this->rowPointer = 0;	
 	}
 	
 	public function generateFac($dataSet, $row ) {
