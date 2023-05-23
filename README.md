@@ -1,11 +1,11 @@
 # xlsx2fac
 
-convert a table to Facto 5.3 import format
+Convert a XLS(X)/ODS/CSV-Speadsheet to Facto 5.3 import format.
 
 1. clone the project 
 2. install phpspreadsheet using composer (https://getcomposer.org/download/)
 
-<code>composer require phpoffice/phpspreadsheet</code>
+   <code>composer require phpoffice/phpspreadsheet</code>
 
 3. add your own profiles to convert
 
