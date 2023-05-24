@@ -86,18 +86,29 @@ class dataFile {
 			        $this->rememberMe["COUNT"] = 0;
 			    } elseif (substr($value,1) == "COUNT") {
 			        $filledData[$key] = $this->rememberMe["COUNT"]++;
+			    } elseif (substr($value,1,5) == "CALC(") {
+			    	$calcStr = substr($value,6,-1);
+			    	$calcStr = $this->replaceVars($calcStr, $row);
+			    	$calcStr = $this->replaceRemembers($calcStr);
+			    	$calcStr = "select ".preg_replace('/[^0-9a-z \.\+\-\*\/\(\)]/','',$calcStr);
+			    	if (DEBUG) { print ("Berechne ".$calcStr."\n"); }
+			    	try {
+			    		$qry = $this->pg_pdo->prepare($calcStr);
+			    		$qry->execute();
+			    		$result = $qry->fetch( PDO::FETCH_NUM );
+			    		if (DEBUG) {  print_r($qry->errorInfo()); print_r($result); }
+			    	} catch (Exception $e) {
+			    		if (DEBUG) { 
+			    			print ("ERROR ".$e."\n"); 
+			    		}
+			    		
+			    		$result[0] = '';
+			    	}
+			    	$filledData[$key] = $result[0];
 			    }
 			    
 			} else {
-				if ($varNames = $this->getVarName($value)) {
-					foreach ($varNames as $variable) {
-						if (DEBUG) {
-							print_r($row);
-							print ('str_replace(${'.$variable.'}, '.$row[$variable].', '.$value.');');
-						}
-						$value = str_replace('${'.$variable."}", $row[$variable], $value);
-					}
-				}
+				$value = $this->replaceVars($value, $row);
 				$filledData[$key] = $value;
 			}
 		}
@@ -138,6 +149,34 @@ class dataFile {
 			return null;
 		}
 		
+	}
+	
+	private function replaceVars($string, $row) {
+		if ($varNames = $this->getVarName($string)) {
+			foreach ($varNames as $variable) {
+				if (DEBUG) {
+					print (' ersetze ${'.$variable.'} mit '.$row[$variable].' in '.$string."\n" );
+				}
+				$string = str_replace('${'.$variable."}", $row[$variable], $string);
+			}
+		}
+		return $string;
+	}
+	
+	private function replaceRemembers($string) {
+		$rememberNames = [];
+		preg_match_all('/\?([a-zA-Z0-9]*) /', $string,  $rememberNames);
+		if ( !empty($rememberNames[1]) ) {
+			foreach ($rememberNames[1] as $variable) {
+				if(!empty($this->rememberMe[$variable])) {
+					if (DEBUG) {
+						print (' ersetze =?'.$variable.' mit '.$this->rememberMe[$variable].' in '.$string."\n" );
+					}
+					$string = str_replace('?'.$variable, $this->rememberMe[$variable], $string);
+				}
+			}
+		}
+		return $string;
 	}
 	
 }
