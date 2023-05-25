@@ -94,12 +94,14 @@ class dataFile {
 			    	if (DEBUG) { print ("Berechne ".$calcStr."\n"); }
 			    	try {
 			    		$qry = $this->pg_pdo->prepare($calcStr);
-			    		$qry->execute();
+			    		$qry->execute() or $this->Proto($qry->errorInfo());
 			    		$result = $qry->fetch( PDO::FETCH_NUM );
 			    		if (DEBUG) {  print_r($qry->errorInfo()); print_r($result); }
 			    	} catch (Exception $e) {
 			    		if (DEBUG) { 
-			    			print ("ERROR ".$e."\n"); 
+			    			print ("ERROR ".$e->getMessage()."\n"); 
+			    		} else {
+			    			$this->Proto($e->getMessage());
 			    		}
 			    		
 			    		$result[0] = '';
@@ -179,6 +181,16 @@ class dataFile {
 		return $string;
 	}
 	
+	private function Proto($logdata) {
+		
+		include './intern/autoload.php';
+		include ("./intern/config.php");
+		
+		$log = new myfile("log/Protokoll".date("Y-m").".log","append");
+		$log->writeLn(date("Y.m.d H:i")."\t".$_SESSION['user']."\t".$logdata);
+		$log->close();
+		
+	}
 }
 
 ?>

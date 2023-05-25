@@ -30,5 +30,5 @@ ${ }      | text between { } is a variable from the actual speedsheet line. firs
 ?         | remember a previous value from data set                                                            | ?ARNR  
 &STARTCOUNT | set a counter for loop to 0| &STARTCOUNT
 &COUNT | add 1 to counter for loop | &COUNT
-&CALC( )| parsing ${..} and ? and calculate the math expression betwee ( ) | &CALC( ${Price} * ?APJS )
+&CALC( )| parsing ${..} and ? and calculate the math expression between ( ) | &CALC( ${Price} * ?APJS )
 starting with text or numbers | static value with parsing ${..} | 0001
