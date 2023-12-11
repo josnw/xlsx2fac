@@ -11,7 +11,7 @@
 					print "<option value='".$name."' >".$name."</option>\n";
 					};
 				?>
-			</select>		
+			</select>	
 		</div>
 		<div class="DSFeld2 right" style="background: #AA5555;"><input type="submit" name="convert" value="Konvertieren" onclick="wartemal('on')"></div>
 	</div>

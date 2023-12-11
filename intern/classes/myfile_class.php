@@ -201,22 +201,24 @@ class myfile {
 
 	public function facData($data) {
 		foreach($data as $key=>$value) {
-			if (is_array($value)) {
-				$cnt = 0;
-				foreach($value as $subkey=>$subvalue) {
-					$subvalue = preg_replace("/[\n\r]/","",$subvalue);
-					if ($cnt++ == 0) {
-						$this->writeLn($key.":".$subvalue);
-					} else {
-						$this->writeLn($key."+".$subvalue);
+			if (substr($key,0,1) != "§") { 
+				if (is_array($value)) {
+					$cnt = 0;
+					foreach($value as $subkey=>$subvalue) {
+						$subvalue = preg_replace("/[\n\r]/","",$subvalue);
+						if ($cnt++ == 0) {
+							$this->writeLn($key.":".$subvalue);
+						} else {
+							$this->writeLn($key."+".$subvalue);
+						}
 					}
-				}
-			} else {
-				$value = preg_replace("/[\n\r]/","",$value);
-				if (trim($key) <> '>>>') {
-					$this->writeLn($key.":".$value); 
 				} else {
-					$this->writeLn(trim($key));
+					$value = preg_replace("/[\n\r]/","",$value);
+					if (trim($key) <> '>>>') {
+						$this->writeLn($key.":".$value); 
+					} else {
+						$this->writeLn(trim($key));
+					}
 				}
 			}
 		}

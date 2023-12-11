@@ -66,8 +66,7 @@ class dataFile {
 			return false;
 		}
 	} 
-	
-	
+		
 	public function resetPointer() {
 		$this->rowPointer = 0;	
 	}
@@ -87,7 +86,7 @@ class dataFile {
 			    } elseif (substr($value,1) == "COUNT") {
 			        $filledData[$key] = $this->rememberMe["COUNT"]++;
 			    } elseif (substr($value,1,5) == "CALC(") {
-			    	$calcStr = substr($value,6,-1);
+			    	(substr($value,6,1) == "!") ? $calcStr = substr($value,7,-1) : $calcStr = substr($value,6,-1);
 			    	$calcStr = $this->replaceVars($calcStr, $row);
 			    	$calcStr = $this->replaceRemembers($calcStr);
 			    	$calcStr = "select ".preg_replace('/[^0-9a-z \.\+\-\*\/\(\)]/','',$calcStr);
@@ -105,6 +104,9 @@ class dataFile {
 			    		}
 			    		
 			    		$result[0] = '';
+			    	}
+			    	if (substr($value,6,1) == "!") {
+			    		$this->rememberMe["CALC".$key] = $result[0];
 			    	}
 			    	$filledData[$key] = $result[0];
 			    }
@@ -139,7 +141,12 @@ class dataFile {
 		
 		$result = $qry->fetch( PDO::FETCH_NUM );
 		
-		return $result[0];
+		if (is_array($result)) {
+			return $result[0];
+		} else {
+			if (DEBUG) { print "SQl Error: ".$sql."\n"; }
+			return null;
+		}
 	}
 
 	private function getVarName($string) {
@@ -167,7 +174,7 @@ class dataFile {
 	
 	private function replaceRemembers($string) {
 		$rememberNames = [];
-		preg_match_all('/\?([a-zA-Z0-9]*) /', $string,  $rememberNames);
+		preg_match_all('/\?([a-zA-Z§0-9]*) /', $string,  $rememberNames);
 		if ( !empty($rememberNames[1]) ) {
 			foreach ($rememberNames[1] as $variable) {
 				if(!empty($this->rememberMe[$variable])) {

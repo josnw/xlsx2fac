@@ -17,7 +17,8 @@ Convert a XLS(X)/ODS/CSV-Speadsheet to Facto 5.3 import format.
 
    <code>LOOP:${path to loop profil filename}[TAB]${row name for group}[TAB]${row name for sort}</code>
    
-   in this case the whole spreadsheet is import. It's not for large files / check the memory limit in the php configuration.
+   in case of a sort row the whole spreadsheet is import. It's not for large files / check the memory limit in the php configuration.
+   you can use NOSORT as sortrow for large file without sorting
 
 3. change the values
 
