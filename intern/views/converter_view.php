@@ -2,7 +2,7 @@
 
 <form action="#" method="POST" enctype="multipart/form-data" >
 	<div class="DSEdit">
-		<div class="DSFeld4">Datei:<br> <input name="uploadFile"  type=file></div>
+		<div class="DSFeld4">Datei:<br><input type=hidden name=MAX_FILE_SIZE value="500000000" ><input name="uploadFile"  type=file ></div>
 		<div class="DSFeld2">Profil:<br> 
 			<select name="profilName">
 				<?php 

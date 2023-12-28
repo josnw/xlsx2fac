@@ -5,45 +5,80 @@ class dataFile {
 	private $spreadsheet;
 	private $inData = [];
 	private $header = [];
-	private $rowCount = 0;
+	private $rowCount = -1; // -1 = headline 0 = erste datenreihe
 	private $rowPointer = 0;
 	private $rememberMe = [];
 	private $pg_pdo;
+	private $bigData = false;
 	
-	
-	public function __construct($filename) {
+	public function __construct($filename, $headlineNumber = 0, $dbURL = null) {
 		include_once('./vendor/autoload.php');
 
 		include './intern/config.php';
+		if (!empty($dbURL)) {
+			$wwsserver = $dbURL;
+		}
 		$this->pg_pdo = new PDO($wwsserver, $wwsuser, $wwspass, null);
 		
 		
 		$this->spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
 		$worksheet = $this->spreadsheet->getActiveSheet();
 		
-		foreach ($worksheet->getRowIterator() as $row) {
-			$cellIterator = $row->getCellIterator();
-			$cellIterator->setIterateOnlyExistingCells(FALSE); 
+		if ($this->spreadsheet->getActiveSheet()->getHighestDataRow() > 1000) {
+			if (DEBUG) { print ("Bigdata File:".$this->spreadsheet->getActiveSheet()->getHighestDataRow()."\n"); }
+			$this->rowCount = $this->spreadsheet->getActiveSheet()->getHighestDataRow();
+			$rowIterator = $worksheet->getRowIterator();
+			$rowIterator->seek($headlineNumber+1); //beginnt mit 0 zu zählen
+			$firstRow = $rowIterator->current();
+			$cellIterator = $firstRow->getCellIterator();
+			$cellIterator->setIterateOnlyExistingCells(FALSE);
 			$ccount = 0; $withData = 0;
 			foreach ($cellIterator as $cell) {
-				if ($this->rowCount == 0) {
 					$this->header[$ccount++] = $cell->getValue();
-					$withData++;
-				} else {
-				    $cellValue = $cell->getFormattedValue();
-					$this->inData[$this->rowCount][$this->header[$ccount++]] = $cellValue;
-					if (!empty($cellValue) ) { $withData++; }
+			}
+			$this->rowPointer = $headlineNumber+2;
+			$this->bigData = true;
+		} else {
+			$startsearch = 0;
+			foreach ($worksheet->getRowIterator() as $row) {
+				if ($startsearch++ < $headlineNumber) {
+					continue;
+				}
+				if (DEBUG) { print "."; }
+				$cellIterator = $row->getCellIterator();
+				$cellIterator->setIterateOnlyExistingCells(FALSE); 
+				$ccount = 0; $withData = 0;
+				foreach ($cellIterator as $cell) {
+					if ($this->rowCount == -1) { // -1 = headline 0 = erste datenreihe
+						$this->header[$ccount++] = $cell->getValue();
+						print $cell->getValue()." ";
+						$withData++;
+					} else {
+						//$cell = $worksheet->getCell($cell);
+						if (\PhpOffice\PhpSpreadsheet\Shared\Date::isDateTime($cell)) {
+							$value = $cell->getValue();
+							if ($value == floor($value)) {
+								$cellValue = date("d.m.Y",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
+							} else {
+								$cellValue = date("d.m.Y H:i:s",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
+							}
+						} else {
+						    $cellValue = $cell->getFormattedValue();
+						}
+						$this->inData[$this->rowCount][$this->header[$ccount++]] = $cellValue;
+						if (!empty($cellValue) ) { $withData++; }
+					}
+				}
+				if ($withData > 0) {
+					$this->rowCount++;
 				}
 			}
 			if ($withData > 0) {
-				$this->rowCount++;
+				//array_pop($this->inData);
+				
 			}
 		}
-		if ($withData > 0) {
-			//array_pop($this->inData);
-			
-		}
-
+		print_r($this->header);
 	}
 	
 	public function rowCount() {
@@ -51,16 +86,40 @@ class dataFile {
 	}
 	
 	public function sortData($groupColumn, $sortColumn, $dir = SORT_ASC) {
-		
+		if ($this->bigData) { return false; }
 		$sortWith1  = array_column($this->inData, $groupColumn);
 		$sortWith2  = array_column($this->inData, $sortColumn);
 		array_multisort($sortWith1, $dir, $sortWith2, $dir, $this->inData);
-		
+		return true;
 	}
 	
 	public function getNextRow() {
-		if (DEBUG) { print "row: ".$this->rowPointer; }
-		if ($this->rowPointer < $this->rowCount) {
+		print "XXX".$this->rowPointer." - ".$this->rowCount."\n";
+		$localInData = [];
+		if (($this->bigData) and ($this->rowPointer < $this->rowCount)) {
+			$worksheet = $this->spreadsheet->getActiveSheet();
+			$rowIterator = $worksheet->getRowIterator();
+			$rowIterator->seek($this->rowPointer++); //beginnt mit 0 zu zählen
+			$firstRow = $rowIterator->current();
+			$cellIterator = $firstRow->getCellIterator();
+			$cellIterator->setIterateOnlyExistingCells(FALSE);
+			$ccount = 0;
+			foreach ($cellIterator as $cell) {
+				//$cell = $worksheet->getCell($cell);
+				if (\PhpOffice\PhpSpreadsheet\Shared\Date::isDateTime($cell)) {
+					$value = $cell->getValue();
+					if (is_integer($value)) {
+						$cellValue = date("d.m.Y",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
+					} else {
+						$cellValue = date("d.m.Y H:i:s",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
+					}
+				} else {
+					$cellValue = $cell->getFormattedValue();
+				}
+				$localInData[$this->header[$ccount++]] = $cellValue;
+			}
+			return $localInData;
+		} elseif ($this->rowPointer < $this->rowCount) {
 			return $this->inData[$this->rowPointer++];
 		} else {
 			return false;
@@ -127,19 +186,21 @@ class dataFile {
 				$sql = str_replace('${'.$variable."}", ':savevar'.$varCount++, $sql);
 			}
 		}
-		
+		if (DEBUG) { print "  SQLValue: ".$sql."\n"; }
 		$qry = $this->pg_pdo->prepare($sql);
 		
 		if (!empty($varNames)) {
 			$varCount = 0;
 			foreach ($varNames as $variable) {
+				if (DEBUG) { print '    :savevar'.$varCount." -> ".$row[$variable]."\n"; }
 				$qry->bindValue(':savevar'.$varCount++, $row[$variable]);
 			}
 		}
-		
 		$qry->execute() or die (print_r($qry->errorInfo()));
 		
 		$result = $qry->fetch( PDO::FETCH_NUM );
+		
+		if (DEBUG) { print "Result: ".var_dump($result); }
 		
 		if (is_array($result)) {
 			return $result[0];
@@ -153,7 +214,7 @@ class dataFile {
 		$varNames = [];
 		preg_match_all('/\${([^}]*)}/', $string,  $varNames);
 		if ( !empty($varNames[1]) ) {
-			return $varNames[1];
+			return array_unique($varNames[1]);
 		} else {
 			return null;
 		}
@@ -199,5 +260,6 @@ class dataFile {
 		
 	}
 }
+
 
 ?>

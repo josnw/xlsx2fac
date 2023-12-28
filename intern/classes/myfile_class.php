@@ -231,7 +231,7 @@ class myfile {
 	}
 
 	public function moveUploaded($uploadFile) {
-		move_uploaded_file($uploadFile,$this->checkedPathName);	
+		move_uploaded_file($uploadFile,$this->checkedPathName);
 		return $this->checkedPathName;
 	}
 
