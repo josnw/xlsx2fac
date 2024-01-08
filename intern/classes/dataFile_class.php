@@ -24,7 +24,7 @@ class dataFile {
 		$this->spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
 		$worksheet = $this->spreadsheet->getActiveSheet();
 		
-		if ($this->spreadsheet->getActiveSheet()->getHighestDataRow() > 1000) {
+		if ($this->spreadsheet->getActiveSheet()->getHighestDataRow() > 5000) {
 			if (DEBUG) { print ("Bigdata File:".$this->spreadsheet->getActiveSheet()->getHighestDataRow()."\n"); }
 			$this->rowCount = $this->spreadsheet->getActiveSheet()->getHighestDataRow();
 			$rowIterator = $worksheet->getRowIterator();
