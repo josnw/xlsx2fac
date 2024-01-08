@@ -51,7 +51,6 @@ class dataFile {
 				foreach ($cellIterator as $cell) {
 					if ($this->rowCount == -1) { // -1 = headline 0 = erste datenreihe
 						$this->header[$ccount++] = $cell->getValue();
-						print $cell->getValue()." ";
 						$withData++;
 					} else {
 						//$cell = $worksheet->getCell($cell);
@@ -60,7 +59,7 @@ class dataFile {
 							if ($value == floor($value)) {
 								$cellValue = date("d.m.Y",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
 							} else {
-								$cellValue = date("d.m.Y H:i:s",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
+								$cellValue = date("d.m.Y H:i",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
 							}
 						} else {
 						    $cellValue = $cell->getFormattedValue();
@@ -78,7 +77,6 @@ class dataFile {
 				
 			}
 		}
-		print_r($this->header);
 	}
 	
 	public function rowCount() {
@@ -94,7 +92,6 @@ class dataFile {
 	}
 	
 	public function getNextRow() {
-		print "XXX".$this->rowPointer." - ".$this->rowCount."\n";
 		$localInData = [];
 		if (($this->bigData) and ($this->rowPointer < $this->rowCount)) {
 			$worksheet = $this->spreadsheet->getActiveSheet();
@@ -224,10 +221,18 @@ class dataFile {
 	private function replaceVars($string, $row) {
 		if ($varNames = $this->getVarName($string)) {
 			foreach ($varNames as $variable) {
-				if (DEBUG) {
-					print (' ersetze ${'.$variable.'} mit '.$row[$variable].' in '.$string."\n" );
+				$splitvar = null;
+				preg_match_all('/(^[^|]*)|([0-9]*)$/', $variable,  $splitvar);
+				if (is_numeric($splitvar[0][1])){
+					$wert = substr($row[$splitvar[0][0]],0,$splitvar[0][01]);
+					if (DEBUG) { print "SPLITVAR: ".$splitvar[0][0]." (".$splitvar[0][1].") = ".$wert."\n"; }
+				} else {
+					$wert = $row[$variable];
 				}
-				$string = str_replace('${'.$variable."}", $row[$variable], $string);
+				if (DEBUG) {
+					print (' ersetze ${'.$variable.'} mit '.$wert.' in '.$string."\n" );
+				}
+				$string = str_replace('${'.$variable."}", $wert, $string);
 			}
 		}
 		return $string;
