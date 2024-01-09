@@ -68,7 +68,11 @@ class facProfil {
 
 	function getLoopGroupRow() {
 		$index = 1;
-		return $this->loop[$index]['groupRow'];
+		if (!empty($this->loop[$index]['groupRow'])) {
+			return $this->loop[$index]['groupRow'];
+		} else {
+			return null;
+		}
 	}
 	
 	function getLoopSortRow() {
@@ -129,7 +133,11 @@ class facProfil {
 	
 	function getAggGroupRow() {
 		$index = 1;
-		return $this->agg[$index]['groupRow'];
+		if (!empty($this->agg[$index]['groupRow'])) {
+			return $this->agg[$index]['groupRow'];
+		} else {
+			return null;
+		}
 	}
 	
 	function getAggGroupRowLen() {

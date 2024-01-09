@@ -86,6 +86,10 @@
 				}
 			}
 		}
+		print "."; 
+		if ($rowCount % 160) {
+			print LR;
+		}
 		$rowCount++;
 	}
 	$filename = $exportFacFile->getCheckedName();
@@ -96,7 +100,7 @@
 		print "</pre>"; 
 	}
 		
-	if (!DEBUG) { unlink($uploadFile->getCheckedPathName()); }
+	if (!DEBUG) { unlink($uploadName); }
 	
 	include('./intern/views/converter_result_view.php');
  }
