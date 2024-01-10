@@ -1,4 +1,3 @@
-
 <?php
  include_once './intern/autoload.php';
  include ("./intern/config.php");
@@ -68,7 +67,6 @@
 				if (DEBUG) { print "AGGTYP: ".$facProfil->getAggTyp($cnt)."\n"; }
 				if ((($facProfil->getAggTyp($cnt) == "SUB:") and ($newnewValue <> $oldsubValue)) or 
 					(($facProfil->getAggTyp($cnt) == "AGG:") and ($newnewValue <> $oldoldValue))) {
-						var_dump($facAggProfil[$cnt]->checkRule($row[$rkey]));
 						if (!($rkey = $facAggProfil[$cnt]->getRuleKey()) or ($facAggProfil[$cnt]->checkRule($row[$rkey]))) {
 				       		$exportFacFile->facData($dataFile->generateFac($facAggProfil[$cnt]->getDataSet(), $row));
 						}
