@@ -46,7 +46,8 @@
 			$facAggProfil[$cnt] = new facProfil($facProfil->getAggFile($cnt));
 		}
 	}
-	$exportFacFile = new myFile($docpath.'FACTO.fac', "new");
+	$exportname = preg_replace("[A-Z0-9]","",$_POST["profilName"]); 
+	$exportFacFile = new myFile($docpath.$exportname.'.fac', "new");
 	$exportFacFile->writeUTF8BOM();
 	$rowCount = 0;
 	$oldValue = null;
@@ -85,7 +86,7 @@
 			}
 		}
 		print "."; 
-		if ($rowCount % 160) {
+		if (($rowCount % 160) == 0) {
 			print LR;
 		}
 		$rowCount++;
@@ -100,6 +101,10 @@
 		
 	if (!DEBUG) { unlink($uploadName); }
 	
-	include('./intern/views/converter_result_view.php');
+	if (strtolower(php_sapi_name()) != 'cli') {
+		include('./intern/views/converter_result_view.php');
+	} else {
+		print "ExportFileName: ".$filename.LR;
+	}
  }
  ?>
