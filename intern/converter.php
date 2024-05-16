@@ -33,6 +33,7 @@
 	$timeloopstart = time();
 	if ( $facProfil->getLoopCount() > 0) {
 		if ($facProfil->getLoopSortRow() != 'NOSORT') {
+			if (DEBUG) { print "Read SORT ".$facProfil->getLoopSortRow()."\n"; }
 			$dataFile->sortData($facProfil->getLoopGroupRow(), $facProfil->getLoopSortRow());
 		}
 		$facLoopProfil = [];

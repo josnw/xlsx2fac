@@ -19,10 +19,23 @@ class dataFile {
 			$wwsserver = $dbURL;
 		}
 		$this->pg_pdo = new PDO($wwsserver, $wwsuser, $wwspass, null);
-		
-		
-		$this->spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
+
+		if (substr($filename,-4) == '.csv') {
+			if (DEBUG) { print ("CSV!"); }
+			$encoding = mb_detect_encoding(file_get_contents($filename), ['UTF-8', 'ISO-8859-1'], true);
+			if (DEBUG) { print ("Encoding: ".$encoding); }
+			if ($encoding === false) { $encoding = 'UTF-8'; }
+			$reader = PhpOffice\PhpSpreadsheet\IOFactory::createReader('Csv');
+			$reader->setDelimiter(';');
+			$reader->setEnclosure('"');
+			$reader->setSheetIndex(0);
+			$this->spreadsheet = $reader->load($filename);
+		} else {
+			$this->spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
+		}
 		$worksheet = $this->spreadsheet->getActiveSheet();
+		
+		
 		
 		if ($this->spreadsheet->getActiveSheet()->getHighestDataRow() > 5000) {
 			if (DEBUG) { print ("Bigdata File:".$this->spreadsheet->getActiveSheet()->getHighestDataRow()."\n"); }
@@ -44,18 +57,21 @@ class dataFile {
 				if ($startsearch++ < $headlineNumber) {
 					continue;
 				}
-				if (DEBUG) { print "."; }
+				if (DEBUG) { print ";"; }
 				$cellIterator = $row->getCellIterator();
 				$cellIterator->setIterateOnlyExistingCells(FALSE); 
 				$ccount = 0; $withData = 0;
 				foreach ($cellIterator as $cell) {
 					if ($this->rowCount == -1) { // -1 = headline 0 = erste datenreihe
+						if (DEBUG) { print ":"; }
 						$this->header[$ccount++] = $cell->getValue();
 						$withData++;
 					} else {
+						if (DEBUG) { print "."; }
 						//$cell = $worksheet->getCell($cell);
 						if (\PhpOffice\PhpSpreadsheet\Shared\Date::isDateTime($cell)) {
 							$value = $cell->getValue();
+							
 							if ($value == floor($value)) {
 								$cellValue = date("d.m.Y",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
 							} else {
@@ -68,6 +84,7 @@ class dataFile {
 						if (!empty($cellValue) ) { $withData++; }
 					}
 				}
+				
 				if ($withData > 0) {
 					$this->rowCount++;
 				}
@@ -84,9 +101,17 @@ class dataFile {
 	}
 	
 	public function sortData($groupColumn, $sortColumn, $dir = SORT_ASC) {
-		if ($this->bigData) { return false; }
+		if (($this->bigData) or ($groupColumn == "NOSORT") or ($sortColumn = "NOSORT")) { return false; }
+		// all values from colum $groupcolumn
 		$sortWith1  = array_column($this->inData, $groupColumn);
+		// all values from colum $sortcolumn
 		$sortWith2  = array_column($this->inData, $sortColumn);
+		//sort $groupcolum and $than $sortcolumn
+		if ((count($sortWith1) == 0) or (count($sortWith2) == 0)) {
+			if (DEBUG) { print "at least one Sort colum is empty!"; }
+			return false;
+		}
+		if (DEBUG) { print_r($sortWith1); print "<br>"; print_r($sortWith1);}
 		array_multisort($sortWith1, $dir, $sortWith2, $dir, $this->inData);
 		return true;
 	}
