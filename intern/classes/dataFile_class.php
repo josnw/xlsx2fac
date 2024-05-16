@@ -22,10 +22,10 @@ class dataFile {
 
 		if (substr($filename,-4) == '.csv') {
 			if (DEBUG) { print ("CSV!"); }
-			$encoding = mb_detect_encoding(file_get_contents($filename), ['UTF-8', 'ISO-8859-1'], true);
+			$reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader('Csv');
+			$encoding = \PhpOffice\PhpSpreadsheet\Reader\Csv::guessEncoding($filename);
 			if (DEBUG) { print ("Encoding: ".$encoding); }
-			if ($encoding === false) { $encoding = 'UTF-8'; }
-			$reader = PhpOffice\PhpSpreadsheet\IOFactory::createReader('Csv');
+			$reader->setInputEncoding($encoding);
 			$reader->setDelimiter(';');
 			$reader->setEnclosure('"');
 			$reader->setSheetIndex(0);
