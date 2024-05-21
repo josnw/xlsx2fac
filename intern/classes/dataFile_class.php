@@ -52,12 +52,16 @@ class dataFile {
 			$this->rowPointer = $headlineNumber+2;
 			$this->bigData = true;
 		} else {
+			if (DEBUG) { print ("MAX Row:".$this->spreadsheet->getActiveSheet()->getHighestDataRow()."\n"); }
 			$startsearch = 0;
 			foreach ($worksheet->getRowIterator() as $row) {
 				if ($startsearch++ < $headlineNumber) {
 					continue;
 				}
-				if (DEBUG) { print ";"; }
+				if ($row->isEmpty()) { // Ignore empty rows
+					continue;
+				}
+				if (DEBUG) { print ";".$this->rowCount; }
 				$cellIterator = $row->getCellIterator();
 				$cellIterator->setIterateOnlyExistingCells(FALSE); 
 				$ccount = 0; $withData = 0;
@@ -101,7 +105,10 @@ class dataFile {
 	}
 	
 	public function sortData($groupColumn, $sortColumn, $dir = SORT_ASC) {
-		if (($this->bigData) or ($groupColumn == "NOSORT") or ($sortColumn = "NOSORT")) { return false; }
+		if (($this->bigData) or ($groupColumn == "NOSORT") or ($sortColumn == "NOSORT")) { 
+			if (DEBUG) { print "BigData or NOSORT Profile"; }
+			return false; 
+		}
 		// all values from colum $groupcolumn
 		$sortWith1  = array_column($this->inData, $groupColumn);
 		// all values from colum $sortcolumn
