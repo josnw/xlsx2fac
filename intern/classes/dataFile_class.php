@@ -77,10 +77,13 @@ class dataFile {
 							$value = $cell->getValue();
 							
 							if ($value == floor($value)) {
-								$cellValue = date("d.m.Y",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
+								//$cellValue = date("d.m.Y",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
+								$cellValue = PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format("d.m.Y");
 							} else {
-								$cellValue = date("d.m.Y H:i",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
+								//$cellValue = date("d.m.Y H:i",PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
+								$cellValue = PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format("d.m.Y H:i");
 							}
+							
 						} else {
 						    $cellValue = $cell->getFormattedValue();
 						}
