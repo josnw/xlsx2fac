@@ -37,6 +37,8 @@ $docpath = "docs/";
 			
 ######## Menu  ##############
 $menu_name['root']['Startseite']  = './converter.php';
+$menu_name['root']['Exporter']  = './facXtractor.php';
+$menu_name['root']['Konverter']  = './converter.php';
 $menu_name['root']['Logout']  = './logout.php';
 
 if (isset($_SESSION["uid"])) {
