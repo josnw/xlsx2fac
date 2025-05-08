@@ -18,7 +18,7 @@ if (( !isset($_SESSION['user']) or (strlen($_SESSION['user']) == 0)) and ( !isse
 			$_SESSION['user'] = $_SERVER['PHP_AUTH_USER'];
 			$_SESSION['uid'] = 1;
 			$_SESSION['PENR'] = 1;
-		} elseif (in_array($_SERVER['PHP_AUTH_USER'],wwsChiefGroups) ) {
+		} elseif (in_array($_SERVER['PHP_AUTH_USER'],$wwsChiefGroups) ) {
 			$_SESSION['typ'] = 'user';
 			$_SESSION['level'] = '6';
 			$_SESSION['user'] = $_SERVER['PHP_AUTH_USER'];
@@ -85,7 +85,7 @@ elseif (isset($_POST['loginuser']) and strlen($_POST['loginuser']) > 0)
 		if (in_array($pw_row['penr'],$wwsAdminUsers) ) {
 			$_SESSION['typ'] = 'root';
 			$_SESSION['level'] = '9';
-		} elseif (in_array($pw_row['qgrp'],wwsChiefGroups) ) {
+		} elseif (in_array($pw_row['qgrp'],$wwsChiefGroups) ) {
 			$_SESSION['typ'] = 'user';
 			$_SESSION['level'] = '6';
 		} else {
