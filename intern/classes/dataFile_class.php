@@ -101,6 +101,10 @@ class dataFile {
 				
 			}
 		}
+		if (DEBUG) {
+			print "HEADER\n";
+			print_r($this->header);
+		}
 	}
 	
 	public function rowCount() {
