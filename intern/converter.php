@@ -63,7 +63,7 @@
 					$exportFacFile->facData($dataFile->generateFac($facProfil->getDataSet(), $row));
 			} catch (Exception $e) {
 				print "Fehler in Datenzeile ".$rowCount.": " . $e->getMessage();
-				print substr(0,30,implode("\t",$row))." ...\n";
+				print substr(implode("\t", $row),0,30)." ...\n";
 			}
 			$oldValue = $row[$facProfil->getLoopGroupRow()];
 				$oldoldValue = $newnewValue;
@@ -79,7 +79,7 @@
 					       		$exportFacFile->facData($dataFile->generateFac($facAggProfil[$cnt]->getDataSet(), $row));
 							} catch (Exception $e) {
 								print "Fehler in Datenzeile ".$rowCount.": " . $e->getMessage();
-								print substr(0,30,implode("\t",$row))." ...\n";
+								print substr(implode("\t", $row),0,30)." ...\n";
 							}
 						
 						}
@@ -97,7 +97,7 @@
 						$exportFacFile->facData($dataFile->generateFac($facLoopProfil[$cnt]->getDataSet(), $row));
 					} catch (Exception $e) {
 						print "Fehler in Datenzeile ".$rowCount.": " . $e->getMessage();
-						print substr(0,30,implode("\t",$row))." ...\n";
+						print substr(implode("\t", $row),0,30)." ...\n";
 					}
 				}
 			}
