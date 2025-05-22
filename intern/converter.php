@@ -59,9 +59,14 @@
 		$newnewValue = substr($row[$facProfil->getAggGroupRow()],0,$facProfil->getAggGroupRowLen());
 		if (empty($facProfil->getLoopGroupRow()) or ($row[$facProfil->getLoopGroupRow()] <> $oldValue) ) {
 			if (DEBUG) { print "NEW GROUPVALUE ".$row[$facProfil->getLoopGroupRow()]."\n"; }
-			$exportFacFile->facData($dataFile->generateFac($facProfil->getDataSet(), $row));
+			try {
+					$exportFacFile->facData($dataFile->generateFac($facProfil->getDataSet(), $row));
+			} catch (Exception $e) {
+				print "Fehler in Datenzeile ".$rowCount.": " . $e->getMessage();
+				print substr(0,30,implode("\t",$row))." ...\n";
+			}
 			$oldValue = $row[$facProfil->getLoopGroupRow()];
-			$oldoldValue = $newnewValue;
+				$oldoldValue = $newnewValue;
 		}
 		if (!empty($facProfil->getAggGroupRow()) and (($newnewValue <> $oldoldValue) or ($newnewValue <> $oldsubValue)) ) {
 			if (DEBUG) { print "NEW AGG GROUP VALUE ".$row[$facProfil->getAggGroupRow()]."\n"; }
@@ -70,7 +75,13 @@
 				if ((($facProfil->getAggTyp($cnt) == "SUB:") and ($newnewValue <> $oldsubValue)) or 
 					(($facProfil->getAggTyp($cnt) == "AGG:") and ($newnewValue <> $oldoldValue))) {
 						if (!($rkey = $facAggProfil[$cnt]->getRuleKey()) or ($facAggProfil[$cnt]->checkRule($row[$rkey]))) {
-				       		$exportFacFile->facData($dataFile->generateFac($facAggProfil[$cnt]->getDataSet(), $row));
+							try {
+					       		$exportFacFile->facData($dataFile->generateFac($facAggProfil[$cnt]->getDataSet(), $row));
+							} catch (Exception $e) {
+								print "Fehler in Datenzeile ".$rowCount.": " . $e->getMessage();
+								print substr(0,30,implode("\t",$row))." ...\n";
+							}
+						
 						}
 				}
 			}
@@ -82,7 +93,12 @@
 			if (DEBUG) { print "NEW LOOP LINE ".$row[$facProfil->getLoopGroupRow()]."\n"; }
 			for ($cnt = 1 ; $cnt <= $facProfil->getLoopCount(); $cnt++) {
 				if (!($rkey = $facLoopProfil[$cnt]->getRuleKey()) or ($facLoopProfil[$cnt]->checkRule($row[$rkey]))) {
-					$exportFacFile->facData($dataFile->generateFac($facLoopProfil[$cnt]->getDataSet(), $row));
+					try {
+						$exportFacFile->facData($dataFile->generateFac($facLoopProfil[$cnt]->getDataSet(), $row));
+					} catch (Exception $e) {
+						print "Fehler in Datenzeile ".$rowCount.": " . $e->getMessage();
+						print substr(0,30,implode("\t",$row))." ...\n";
+					}
 				}
 			}
 		}
